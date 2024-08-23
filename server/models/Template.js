@@ -1,4 +1,4 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const TemplateSchema = new Schema({
@@ -6,14 +6,17 @@ const TemplateSchema = new Schema({
     type: String,
     required: true,
   },
-  userId: {
+  owner: {
     type: Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
-  fields: {
-    type: Object,
-  },
+  fields: [
+    {
+      name: { type: String },
+      type: { type: String },
+    },
+  ],
 });
 
 const Template = mongoose.model("Template", TemplateSchema);

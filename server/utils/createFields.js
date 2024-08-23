@@ -1,31 +1,49 @@
 import mongoose from "mongoose";
-import Template from "../models/Template";
-
 const { Schema } = mongoose;
 
-const createFields = (userId, modelName, fields) => {
-  const schemaFields = {};
+const createFields = (templateId, fields) => {
+  const dynamicSchema = new Schema(
+    {
+      template: {
+        type: Schema.Types.ObjectId,
+        ref: "Template",
+        required: true,
+      },
+    },
+    { strict: false }
+  );
 
-  // Assuming `fields` is an array of objects with 'name' and 'type' properties
   fields.forEach((field) => {
-    schemaFields[field.name] = { type: field.type };
+    let fieldType;
+    switch (field.type.toLowerCase()) {
+      case "string":
+        fieldType = String;
+        break;
+      case "number":
+        fieldType = Number;
+        break;
+      case "date":
+        fieldType = Date;
+        break;
+      case "boolean":
+        fieldType = Boolean;
+        break;
+      default:
+        fieldType = Schema.Types.Mixed;
+    }
+
+    dynamicSchema.add({
+      [field.name]: fieldType,
+    });
   });
 
-  const dynamicSchema = new Schema(schemaFields);
+  const modelName = `Template${templateId}Data`;
 
-  // Model name should be unique for each user
-  const dynamicModel = mongoose.model(`${modelName}_${userId}`, dynamicSchema);
+  if (mongoose.models[modelName]) {
+    return mongoose.model(modelName);
+  }
 
-  // Save the metadata to FormModel
-  const formModel = new Template({
-    userId,
-    modelName,
-    fields: schemaFields,
-  });
-
-  formModel.save();
-
-  return dynamicModel;
+  return mongoose.model(modelName, dynamicSchema);
 };
 
 export default createFields;

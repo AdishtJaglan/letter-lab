@@ -7,6 +7,9 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 
+import userRoutes from "./routes/userRoutes.js";
+import templateRoutes from "./routes/templateRoutes.js";
+
 const app = express();
 const PORT = process.env.PORT || 8000;
 const connectionString =
@@ -23,6 +26,9 @@ mongoose
 
 app.use(cors());
 app.use(express.json());
+
+app.use("/api/user", userRoutes);
+app.use("/api/template", templateRoutes);
 
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}.`);
