@@ -9,6 +9,7 @@ import dotenv from "dotenv";
 
 import userRoutes from "./routes/userRoutes.js";
 import templateRoutes from "./routes/templateRoutes.js";
+import dynamicRoutes from "./routes/dynamicRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -29,6 +30,7 @@ app.use(express.json());
 
 app.use("/api/user", userRoutes);
 app.use("/api/template", templateRoutes);
+app.use("/api/dynamic", dynamicRoutes);
 
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}.`);
