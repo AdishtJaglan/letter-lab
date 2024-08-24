@@ -7,8 +7,11 @@ import {
   setMailSent,
   updateDynamicModel,
 } from "../controllers/dynamicControllers.js";
+import validateObjectId from "../middlewares/validateObjectId.js";
 
 const router = Router();
+
+router.use("/:templateId", validateObjectId);
 
 /**
  * @POST add data to dynamically created model of fields.

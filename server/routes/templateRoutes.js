@@ -6,8 +6,12 @@ import {
   getUserTemplate,
   updateTemplate,
 } from "../controllers/templateControllers.js";
+import validateObjectId from "../middlewares/validateObjectId.js";
 
 const router = Router();
+
+router.use("/:userId", validateObjectId);
+router.use("/:templateId", validateObjectId);
 
 /**
  * @POST create a template.

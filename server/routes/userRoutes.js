@@ -7,8 +7,11 @@ import {
   getUserTemplate,
   updateUser,
 } from "../controllers/userControllers.js";
+import validateObjectId from "../middlewares/validateObjectId.js";
 
 const router = Router();
+
+router.use("/:id", validateObjectId);
 
 /**
  * @POST create a user.

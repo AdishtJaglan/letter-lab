@@ -7,6 +7,8 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 
+import rateLimiter from "./middlewares/rateLimiter.js";
+
 import userRoutes from "./routes/userRoutes.js";
 import templateRoutes from "./routes/templateRoutes.js";
 import dynamicRoutes from "./routes/dynamicRoutes.js";
@@ -25,6 +27,7 @@ mongoose
     console.log("Error connecting to database: " + error.message);
   });
 
+app.use(rateLimiter);
 app.use(cors());
 app.use(express.json());
 
