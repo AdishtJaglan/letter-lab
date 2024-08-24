@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import hashPassword from "../middlewares/hashPassword.js";
 const { Schema } = mongoose;
 
 const UserSchema = new Schema({
@@ -21,6 +22,8 @@ const UserSchema = new Schema({
     },
   ],
 });
+
+UserSchema.pre("save", hashPassword);
 
 const User = mongoose.model("User", UserSchema);
 export default User;
