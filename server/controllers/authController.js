@@ -5,7 +5,7 @@ import User from "../models/User.js";
 /**
  * @POST verify credential and issue access and refresh tokens.
  * @AUTH - NOT REQUIRED
- * @ENDPOINT /api/token
+ * @ENDPOINT /api/auth/token
  * @REQ_BODY => { username, email } are required.
  * @RES_BODY => { message, accessToken, refreshToken }
  */
@@ -18,7 +18,7 @@ export const getAccessToken = async (req, res) => {
       return res.status(404).json({ message: "User not found." });
     }
 
-    const isPasswordValid = bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid credentials." });
@@ -50,7 +50,7 @@ export const getAccessToken = async (req, res) => {
 /**
  * @POST verify refresh token and get another access token issued.
  * @AUTH - NOT REQUIRED
- * @ENDPOINT /api/refresh
+ * @ENDPOINT /api/auth/refresh
  * @REQ_BODY => { refreshToken } is required.
  * @RES_BODY => { message, accessToken }
  */
