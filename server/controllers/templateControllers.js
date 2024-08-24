@@ -1,4 +1,4 @@
-import createFields from "../utils/createFields.js";
+import getDyanmicModel from "../models/DynamicModel.js";
 import User from "../models/User.js";
 import Template from "../models/Template.js";
 
@@ -26,7 +26,7 @@ export const createTemplate = async (req, res) => {
       $push: { templates: template._id },
     });
 
-    createFields(template._id, fields);
+    getDyanmicModel(template._id, fields);
 
     return res
       .status(200)
@@ -117,7 +117,7 @@ export const updateTemplate = async (req, res) => {
       return res.status(404).json({ message: "Template not found." });
     }
 
-    createFields(templateId, fields);
+    getDyanmicModel(templateId, fields);
 
     return res.status(200).json({
       message: "Template updated successfully.",
@@ -151,7 +151,7 @@ export const deleteTemplate = async (req, res) => {
     });
 
     // Delete the dynamic model and its data
-    const DynamicModel = createFields(templateId, deletedTemplate.fields);
+    const DynamicModel = getDyanmicModel(templateId, deletedTemplate.fields);
     await DynamicModel.deleteMany({ template: templateId });
 
     return res.status(200).json({

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
-const createFields = (templateId, fields) => {
+const getDyanmicModel = (templateId, fields) => {
   const dynamicSchema = new Schema(
     {
       template: {
@@ -50,4 +50,4 @@ const createFields = (templateId, fields) => {
   return mongoose.model(modelName, dynamicSchema);
 };
 
-export default createFields;
+export default getDyanmicModel;
