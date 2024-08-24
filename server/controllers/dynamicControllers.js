@@ -4,7 +4,7 @@ import Template from "../models/Template.js";
 /**
  * @POST add data to dynamically created model of fields.
  * @AUTH -
- * @ENDPOINT /api/template/create/:templateId
+ * @ENDPOINT /api/dynamic/:templateId
  * @REQ_BODY => { req.body } is required, it should be same the fields to the model
  *              you are trying to reach.
  */
@@ -36,7 +36,7 @@ export const addDataToDynamicModel = async (req, res) => {
 /**
  * @GET Get all data for a specific template.
  * @AUTH -
- * @ENDPOINT /api/template/data/:templateId
+ * @ENDPOINT /api/dynamic/:templateId
  * @RES_BODY => { message, templateName, fields[], data[] } fields are field of the dynamic model,
  *              data is the data retrieved from that model
  */

@@ -9,6 +9,10 @@ const createFields = (templateId, fields) => {
         ref: "Template",
         required: true,
       },
+      isMailSent: {
+        type: Boolean,
+        default: false,
+      },
     },
     { strict: false }
   );
