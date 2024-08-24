@@ -1,9 +1,11 @@
 import { Router } from "express";
 import {
   createUser,
+  deleteUser,
   getAllUsers,
   getOneUser,
   getUserTemplate,
+  updateUser,
 } from "../controllers/userControllers.js";
 
 const router = Router();
@@ -39,5 +41,20 @@ router.get("/:id/template", getUserTemplate);
  * @RES_BODY => {message, data} data will be a user.
  */
 router.get("/:id", getOneUser);
+
+/**
+ * @PUT Update a user data.
+ * @AUTH -
+ * @ENDPOINT /api/user/:id
+ * @REQ_BODY => { req.body } body has to be updated user body.
+ */
+router.put("/:id", updateUser);
+
+/**
+ * @DELETE Delete a user data.
+ * @AUTH -
+ * @ENDPOINT /api/user/:id
+ */
+router.delete("/:id", deleteUser);
 
 export default router;

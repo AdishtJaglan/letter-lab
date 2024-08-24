@@ -109,3 +109,63 @@ export const getOneUser = async (req, res) => {
       .json({ message: "Unable to fetch user.", error: error.message });
   }
 };
+
+/**
+ * @PUT Update a user data.
+ * @AUTH -
+ * @ENDPOINT /api/user/:id
+ * @REQ_BODY => { req.body } body has to be updated user body.
+ */
+export const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateBody = req.body;
+
+    const checkUser = await User.findById(id);
+
+    if (!checkUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(id, updateBody, {
+      new: true,
+    });
+
+    return res.status(200).json({
+      message: "Updated user successfully.",
+      updatedData: updatedUser,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "User information unable to be updated",
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * @DELETE Delete a user data.
+ * @AUTH -
+ * @ENDPOINT /api/user/:id
+ */
+export const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const checkUser = await User.findById(id);
+
+    if (!checkUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const deletedUser = await User.findByIdAndDelete(id);
+
+    return res.status(200).json({
+      message: "User deleted successfully.",
+      deletedData: deletedUser,
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Unable to delete user.", error: error.message });
+  }
+};
