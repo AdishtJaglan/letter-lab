@@ -28,8 +28,8 @@ mongoose
     console.log("Error connecting to database: " + error.message);
   });
 
-app.use(rateLimiter);
 app.use(cors());
+app.use(rateLimiter);
 app.use(express.json());
 
 app.use("/api/user", userRoutes);
