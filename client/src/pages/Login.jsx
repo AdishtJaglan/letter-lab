@@ -37,8 +37,14 @@ const LoginPage = () => {
           const accessTokenValidity = response.data?.accessToken?.valid;
           const refreshTokenValidity = response.data?.refreshToken?.valid;
 
+          const userId =
+            response.data?.accessToken?.user?.userId ??
+            response.data?.refreshToken?.user?.userId;
+
           if (accessTokenValidity) {
-            navigate("/dashboard");
+            navigate("/dashboard", {
+              state: { isLoggedIn: true, userId: userId },
+            });
           } else if (refreshTokenValidity) {
             const refreshResponse = await axios.post(
               `${import.meta.env.VITE_API_URL}/auth/refresh`,
@@ -48,7 +54,9 @@ const LoginPage = () => {
             const newAccessToken = refreshResponse.data?.accessToken;
             if (newAccessToken) {
               localStorage.setItem("accessToken", newAccessToken);
-              navigate("/dashboard");
+              navigate("/dashboard", {
+                state: { isLoggedIn: true, userId: userId },
+              });
             }
           }
         } catch (error) {
