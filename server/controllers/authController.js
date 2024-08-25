@@ -88,3 +88,34 @@ export const getNewAccessToken = async (req, res) => {
       .json({ message: "Error issuing access token.", error: error.message });
   }
 };
+
+/**
+ * @POST Verify JWT Token
+ * @AUTH None
+ * @ENDPOINT /api/auth/verify-token
+ * @REQ_BODY { token }
+ * @RES_BODY { message, user } -> user contains userId
+ */
+export const verifyAccessToken = async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ message: "Token is missing" });
+    }
+
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded) => {
+      if (error) {
+        return res.status(401).json({ message: "Access token invalid." });
+      }
+
+      return res
+        .status(200)
+        .json({ message: "Access token is valid.", user: decoded });
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error verifying access token.", error: error.message });
+  }
+};
