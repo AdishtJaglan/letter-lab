@@ -90,29 +90,68 @@ export const getNewAccessToken = async (req, res) => {
 };
 
 /**
- * @POST Verify JWT Token
- * @AUTH None
- * @ENDPOINT /api/auth/verify-token
- * @REQ_BODY { token }
- * @RES_BODY { message, user } -> user contains userId
+ * @POST Verify JWT Tokens
+ * @AUTH - NOT REQUIRED
+ * @ENDPOINT /api/auth/verify
+ * @REQ_BODY { accessToken, refreshToken }
+ * @RES_BODY { accessToken, refreshToken } -> contains information regarding validity of each token.
+ *                                            If valid, contains a user object with userID
  */
-export const verifyAccessToken = async (req, res) => {
+export const verifyAccessAndRefreshTokens = async (req, res) => {
   try {
-    const { token } = req.body;
+    const { accessToken, refreshToken } = req.body;
 
-    if (!token) {
-      return res.status(400).json({ message: "Token is missing" });
+    if (!accessToken && !refreshToken) {
+      return res
+        .status(400)
+        .json({ message: "Tokens missing. Invalid request." });
     }
 
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded) => {
-      if (error) {
-        return res.status(401).json({ message: "Access token invalid." });
-      }
+    const response = {};
 
-      return res
-        .status(200)
-        .json({ message: "Access token is valid.", user: decoded });
-    });
+    if (accessToken) {
+      jwt.verify(
+        accessToken,
+        process.env.ACCESS_TOKEN_SECRET,
+        (error, decoded) => {
+          if (error) {
+            response.accessToken = {
+              valid: false,
+              message: "Access token invalid.",
+            };
+          } else {
+            response.accessToken = {
+              valid: true,
+              message: "Access token valid.",
+              user: decoded,
+            };
+          }
+        }
+      );
+    }
+
+    if (refreshToken) {
+      jwt.verify(
+        refreshToken,
+        process.env.REFRESH_TOKEN_SECRET,
+        (error, decoded) => {
+          if (error) {
+            response.refreshToken = {
+              valid: false,
+              message: "Refresh token invalid.",
+            };
+          } else {
+            response.refreshToken = {
+              valid: true,
+              message: "Refresh token valid.",
+              user: decoded,
+            };
+          }
+        }
+      );
+    }
+
+    return res.status(200).json(response);
   } catch (error) {
     return res
       .status(500)

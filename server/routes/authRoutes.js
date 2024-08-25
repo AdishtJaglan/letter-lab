@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   getAccessToken,
   getNewAccessToken,
-  verifyAccessToken,
+  verifyAccessAndRefreshTokens,
 } from "../controllers/authController.js";
 const router = Router();
 
@@ -25,12 +25,13 @@ router.post("/token", getAccessToken);
 router.post("/refresh", getNewAccessToken);
 
 /**
- * @POST Verify JWT Token
- * @AUTH None
- * @ENDPOINT /api/auth/verify-token
- * @REQ_BODY { token }
- * @RES_BODY { message, user } -> user contains userId
+ * @POST Verify JWT Tokens
+ * @AUTH - NOT REQUIRED
+ * @ENDPOINT /api/auth/verify
+ * @REQ_BODY { accessToken, refreshToken }
+ * @RES_BODY { accessToken, refreshToken } -> contains information regarding validity of each token.
+ *                                            If valid, contains a user object with userID
  */
-router.post("/verify", verifyAccessToken);
+router.post("/verify", verifyAccessAndRefreshTokens);
 
 export default router;
