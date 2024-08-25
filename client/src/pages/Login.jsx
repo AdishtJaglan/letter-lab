@@ -1,24 +1,100 @@
-import GlowCursor from "../components/GlowCursor";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { FiMail, FiLock } from "react-icons/fi";
+import { ImSpinner8 } from "react-icons/im";
+import { toast, ToastContainer } from "react-toastify";
+import axios from "axios";
+import GlowCursor from "../components/GlowCursor";
+import "react-toastify/dist/ReactToastify.css";
 
 const LoginPage = () => {
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const data = {
+      email: formData.email,
+      password: formData.password,
+    };
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/token`,
+        data,
+      );
+
+      const { accessToken, refreshToken } = response.data;
+
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+
+      setFormData({ email: "", password: "" });
+
+      navigate("/dashboard", { state: { isLoggedIn: true } });
+    } catch (error) {
+      console.error("Error loggin in: " + error?.message || error?.error);
+      toast.error("Error logging in: " + error?.message || error?.error, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="from-primary-dark via-secondary-dark to-primary-accent flex min-h-screen items-center justify-center bg-gradient-to-br p-4">
       <GlowCursor />
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
       <div className="bg-primary-light absolute inset-0 opacity-10 backdrop-blur-lg backdrop-filter"></div>
       <div className="bg-primary-light z-10 w-full max-w-md overflow-hidden rounded-2xl bg-opacity-20 shadow-xl backdrop-blur-xl backdrop-filter">
         <div className="p-8">
           <h2 className="text-primary-light mb-6 text-center text-3xl font-bold">
             Welcome Back
           </h2>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="space-y-6">
               <div className="relative">
                 <FiMail className="absolute left-3 top-1/2 h-auto w-4 -translate-y-2 text-white/60" />
                 <input
                   type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   id="email"
                   className="bg-primary-light text-primary-light placeholder-primary-light focus:ring-primary-accent w-full cursor-none rounded-lg bg-opacity-10 px-4 py-3 pl-10 placeholder-opacity-60 focus:outline-none focus:ring-2"
                   placeholder="you@example.com"
@@ -28,6 +104,9 @@ const LoginPage = () => {
                 <FiLock className="absolute left-3 top-1/2 h-auto w-4 -translate-y-2 text-white/60" />
                 <input
                   type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
                   id="password"
                   className="bg-primary-light text-primary-light placeholder-primary-light focus:ring-primary-accent w-full cursor-none rounded-lg bg-opacity-10 px-4 py-3 pl-10 placeholder-opacity-60 focus:outline-none focus:ring-2"
                   placeholder="••••••••"
@@ -61,9 +140,13 @@ const LoginPage = () => {
             <div className="mt-8">
               <button
                 type="submit"
-                className="from-primary-accent to-secondary-accent text-primary-light hover:from-primary-accentHover hover:to-secondary-accentHover focus:ring-primary-accent w-full cursor-none rounded-lg bg-gradient-to-r px-4 py-3 font-bold transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                className="from-primary-accent to-secondary-accent text-primary-light hover:from-primary-accentHover hover:to-secondary-accentHover focus:ring-primary-accent flex w-full cursor-none items-center justify-center rounded-lg bg-gradient-to-r px-4 py-3 font-bold transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2"
               >
-                Sign In
+                {loading ? (
+                  <ImSpinner8 className="h-auto w-5 animate-spin" />
+                ) : (
+                  "Sign In"
+                )}
               </button>
             </div>
           </form>
