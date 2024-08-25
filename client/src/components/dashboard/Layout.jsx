@@ -5,15 +5,17 @@ import Sidebar from "./Sidebar";
 const Layout = ({ children }) => {
   return (
     <div className="flex h-screen">
-      <div className="from-primary-dark to-secondary-dark grid h-screen w-screen grid-cols-[1fr_12fr] grid-rows-[1fr_8fr] bg-gradient-to-br">
+      <div className="grid h-screen w-screen grid-cols-[auto_5fr] grid-rows-[auto_1fr] bg-gradient-to-br from-primary-dark to-secondary-dark md:grid-cols-[auto_1fr] md:grid-rows-[auto_1fr]">
         {/* Navbar */}
         <Navbar />
 
         {/* Sidebar */}
-        <Sidebar className="row-span-2" />
+        <Sidebar className="hidden md:block" />
 
         {/* Main Content */}
-        <div className="overflow-y-auto overflow-x-hidden p-6">{children}</div>
+        <div className="overflow-y-auto overflow-x-hidden p-4 md:p-6">
+          {children}
+        </div>
       </div>
     </div>
   );
