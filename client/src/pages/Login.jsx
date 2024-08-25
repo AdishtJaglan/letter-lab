@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
@@ -16,6 +16,49 @@ const LoginPage = () => {
     password: "",
   });
   const navigate = useNavigate();
+
+  /**
+   * - checking if tokens are present, if tokens are present verify their validity.
+   * - if access token expired, but refresh token valid, issue new access token.
+   * - does nothing if both tokens are invalid.
+   */
+  useEffect(() => {
+    const accessToken = localStorage.getItem("accessToken");
+    const refreshToken = localStorage.getItem("refreshToken");
+
+    if (accessToken || refreshToken) {
+      const checkTokenValidity = async () => {
+        try {
+          const response = await axios.post(
+            `${import.meta.env.VITE_API_URL}/auth/verify`,
+            { accessToken, refreshToken },
+          );
+
+          const accessTokenValidity = response.data?.accessToken?.valid;
+          const refreshTokenValidity = response.data?.refreshToken?.valid;
+
+          if (accessTokenValidity) {
+            navigate("/dashboard");
+          } else if (refreshTokenValidity) {
+            const refreshResponse = await axios.post(
+              `${import.meta.env.VITE_API_URL}/auth/refresh`,
+              { refreshToken },
+            );
+
+            const newAccessToken = refreshResponse.data?.accessToken;
+            if (newAccessToken) {
+              localStorage.setItem("accessToken", newAccessToken);
+              navigate("/dashboard");
+            }
+          }
+        } catch (error) {
+          console.error("Error checking token validity:", error);
+        }
+      };
+
+      checkTokenValidity();
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
