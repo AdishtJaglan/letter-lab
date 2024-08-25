@@ -1,7 +1,7 @@
 const Landing = () => {
   return (
     <>
-      <div className="mx-auto max-w-4xl text-center">
+      <div className="mt-24 max-w-4xl text-center">
         <p className="text-tertiary-light mb-8 text-lg font-medium uppercase tracking-wide sm:text-xl md:text-2xl">
           generate <span className="text-secondary-accent">•</span> send{" "}
           <span className="text-primary-accentHover">•</span> personalize
