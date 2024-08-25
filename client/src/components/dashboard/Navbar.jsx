@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 
 const Navbar = () => {
@@ -7,8 +8,12 @@ const Navbar = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const { userId } = location.state;
     const token = localStorage.getItem("accessToken");
+    const userId =
+      location.state?.userId || (token ? jwtDecode(token).userId : undefined);
+    console.log(location.state);
+    console.log(jwtDecode(token));
+    console.log(userId);
 
     if (userId) {
       const fetchUserName = async () => {
@@ -29,14 +34,14 @@ const Navbar = () => {
   }, [location]);
 
   return (
-    <div className="border-secondary-dark bg-primary-dark/30 col-span-2 flex w-full items-center justify-between border-b p-4 backdrop-blur-md">
-      <p className="text-primary-light text-3xl font-black tracking-wide">
+    <div className="col-span-2 flex w-full items-center justify-between border-b border-secondary-dark bg-primary-dark/30 p-4 backdrop-blur-md">
+      <p className="text-3xl font-black tracking-wide text-primary-light">
         Admin Dashboard
       </p>
 
       <div className="flex items-center space-x-4">
         <div className="flex items-center gap-3 space-x-2">
-          <h1 className="text-primary-light text-lg font-semibold sm:text-xl md:text-2xl">
+          <h1 className="text-lg font-semibold text-primary-light sm:text-xl md:text-2xl">
             Hi, {username}!
           </h1>
         </div>
