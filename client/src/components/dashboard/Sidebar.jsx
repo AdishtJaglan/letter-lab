@@ -2,11 +2,11 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FiHome, FiUserPlus } from "react-icons/fi";
 import {
-  IoSearch,
   IoSettingsOutline,
   IoLogOutOutline,
   IoPersonOutline,
 } from "react-icons/io5";
+import { GrDocumentConfig } from "react-icons/gr";
 
 export default function Sidebar() {
   const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -15,7 +15,7 @@ export default function Sidebar() {
   const sidebarItems = [
     { icon: FiHome, text: "Home", path: "/dashboard" },
     { icon: FiUserPlus, text: "Add", path: "#" },
-    { icon: IoSearch, text: "Search", path: "#" },
+    { icon: GrDocumentConfig, text: "Configure", path: "#" },
     { icon: IoPersonOutline, text: "Profile", path: "#" },
     { icon: IoSettingsOutline, text: "Settings", path: "#" },
     { icon: IoLogOutOutline, text: "Logout", path: "/home" },
