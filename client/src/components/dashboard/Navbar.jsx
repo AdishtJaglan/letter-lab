@@ -5,6 +5,7 @@ import axios from "axios";
 
 const Navbar = () => {
   const [username, setUsername] = useState("");
+  const [pfp, setPfp] = useState("");
   const location = useLocation();
 
   useEffect(() => {
@@ -23,6 +24,7 @@ const Navbar = () => {
           },
         );
 
+        setPfp(response.data.data.profilePicture.url);
         setUsername(response.data.data.username);
       };
 
@@ -43,7 +45,7 @@ const Navbar = () => {
 
         <div className="relative">
           <img
-            src={"/profile-1.jpg"}
+            src={pfp ? pfp : "/profile-1.jpg"}
             className="h-8 w-8 rounded-full sm:h-10 sm:w-10"
             alt="Profile"
           />
