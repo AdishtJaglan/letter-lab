@@ -15,7 +15,7 @@ const Navbar = () => {
     if (userId) {
       const fetchUserName = async () => {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/user/${userId}`,
+          `${import.meta.env.VITE_API_URL}/user/info`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
