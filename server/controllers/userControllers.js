@@ -68,12 +68,12 @@ export const getAllUsers = async (req, res) => {
 /**
  * @GET get a user and their template info.
  * @AUTH - REQUIRED
- * @ENDPOINT /api/user/:id/template
+ * @ENDPOINT /api/user/template
  * @RES_BODY => { message, data, templates[] } data will be a user, template will be registered templates.
  */
 export const getUserTemplate = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { userId: id } = req.user;
 
     const user = await User.findById(id).populate("templates");
 
@@ -99,12 +99,12 @@ export const getUserTemplate = async (req, res) => {
 /**
  * @GET get one user.
  * @AUTH - REQUIRED
- * @ENDPOINT /api/user/:id
+ * @ENDPOINT /api/user/info
  * @RES_BODY => { message, data } data will be a user.
  */
 export const getOneUser = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { userId: id } = req.user;
 
     const user = await User.findById(id);
 
@@ -123,13 +123,13 @@ export const getOneUser = async (req, res) => {
 /**
  * @PATCH Update profile picture.
  * @AUTH - REQUIRED
- * @ENDPOINT /api/user/:id
+ * @ENDPOINT /api/user/
  * @REQ_BODY => { profile } -> updated profile picture
  * @RES_BODY => { message, user } -> updated user
  */
 export const updateProfilePicture = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { userId: id } = req.user;
     const checkUser = await User.findById(id);
 
     if (!checkUser) {
@@ -172,12 +172,12 @@ export const updateProfilePicture = async (req, res) => {
 /**
  * @PUT Update a user data.
  * @AUTH - REQUIRED
- * @ENDPOINT /api/user/:id
+ * @ENDPOINT /api/user/
  * @REQ_BODY => { req.body } body has to be updated user body.
  */
 export const updateUser = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { userId: id } = req.user;
     const updateBody = { ...req.body };
 
     if (updateBody.profilePicture) {
@@ -209,11 +209,11 @@ export const updateUser = async (req, res) => {
 /**
  * @DELETE Delete a user data.
  * @AUTH - REQUIRED
- * @ENDPOINT /api/user/:id
+ * @ENDPOINT /api/user/
  */
 export const deleteUser = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { userId: id } = req.user;
     const checkUser = await User.findById(id);
 
     if (!checkUser) {

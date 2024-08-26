@@ -10,13 +10,10 @@ import {
   updateProfilePicture,
   updateUser,
 } from "../controllers/userControllers.js";
-import validateObjectId from "../middlewares/validateObjectId.js";
 import verifyJwt from "../middlewares/verifyJwt.js";
 
 const router = Router();
 const upload = multer({ storage });
-
-router.use("/:id", validateObjectId);
 
 /**
  * @POST create a user.
@@ -37,41 +34,41 @@ router.get("/", verifyJwt, getAllUsers);
 /**
  * @GET get a user and their template info.
  * @AUTH - REQUIRED
- * @ENDPOINT /api/user/:id/template
+ * @ENDPOINT /api/user/template
  * @RES_BODY => { message, data, templates[] } data will be a user, template will be registered templates.
  */
-router.get("/:id/template", verifyJwt, getUserTemplate);
+router.get("/template", verifyJwt, getUserTemplate);
 
 /**
  * @GET get one user.
  * @AUTH - REQUIRED
- * @ENDPOINT /api/user/:id
+ * @ENDPOINT /api/user/info
  * @RES_BODY => { message, data } data will be a user.
  */
-router.get("/:id", verifyJwt, getOneUser);
+router.get("/info", verifyJwt, getOneUser);
 
 /**
  * @PATCH Update profile picture.
  * @AUTH - REQUIRED
- * @ENDPOINT /api/user/:id
+ * @ENDPOINT /api/user/
  * @REQ_BODY => { profile } -> updated profile picture
  * @RES_BODY => { message, user } -> updated user
  */
-router.patch("/:id", upload.single("profile"), verifyJwt, updateProfilePicture);
+router.patch("/", upload.single("profile"), verifyJwt, updateProfilePicture);
 
 /**
  * @PUT Update a user data.
  * @AUTH - REQUIRED
- * @ENDPOINT /api/user/:id
+ * @ENDPOINT /api/user/
  * @REQ_BODY => { req.body } body has to be updated user body.
  */
-router.put("/:id", verifyJwt, updateUser);
+router.put("/", verifyJwt, updateUser);
 
 /**
  * @DELETE Delete a user data.
  * @AUTH - REQUIRED
- * @ENDPOINT /api/user/:id
+ * @ENDPOINT /api/user/
  */
-router.delete("/:id", verifyJwt, deleteUser);
+router.delete("/", verifyJwt, deleteUser);
 
 export default router;
