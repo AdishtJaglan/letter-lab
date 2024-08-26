@@ -15,6 +15,10 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
+  profilePicture: {
+    url: String,
+    name: String,
+  },
   templates: [
     {
       type: Schema.Types.ObjectId,

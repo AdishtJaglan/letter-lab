@@ -1,14 +1,16 @@
+import { v2 as cloudinary } from "cloudinary";
 import User from "../models/User.js";
 
 /**
  * @POST create a user.
- * @AUTH -
+ * @AUTH - NOT REQUIRED
  * @ENDPOINT /api/user
- * @REQ_BODY => {username, email, password} are required.
+ * @REQ_BODY => { username, email, password } are required.
  */
 export const createUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
+    const { filename, path } = req.file;
 
     if (!username || !email || !password) {
       return res.status(400).json({ message: "All field mandatory." });
@@ -20,7 +22,15 @@ export const createUser = async (req, res) => {
       return res.status(409).json({ message: "User already exists." });
     }
 
-    const user = await User.create({ username, email, password });
+    const user = await User.create({
+      username,
+      email,
+      password,
+      profilePicture: {
+        url: path,
+        name: filename,
+      },
+    });
 
     return res
       .status(201)
@@ -35,9 +45,9 @@ export const createUser = async (req, res) => {
 
 /**
  * @GET get all users.
- * @AUTH -
+ * @AUTH - REQUIRED
  * @ENDPOINT /api/user
- * @RES_BODY => {message, data[]} data will be an array of users.
+ * @RES_BODY => { message, data[] } data will be an array of users.
  */
 export const getAllUsers = async (req, res) => {
   try {
@@ -57,9 +67,9 @@ export const getAllUsers = async (req, res) => {
 
 /**
  * @GET get a user and their template info.
- * @AUTH -
+ * @AUTH - REQUIRED
  * @ENDPOINT /api/user/:id/template
- * @RES_BODY => {message, data, templates[]} data will be a user, template will be registered templates.
+ * @RES_BODY => { message, data, templates[] } data will be a user, template will be registered templates.
  */
 export const getUserTemplate = async (req, res) => {
   try {
@@ -88,9 +98,9 @@ export const getUserTemplate = async (req, res) => {
 
 /**
  * @GET get one user.
- * @AUTH -
+ * @AUTH - REQUIRED
  * @ENDPOINT /api/user/:id
- * @RES_BODY => {message, data} data will be a user.
+ * @RES_BODY => { message, data } data will be a user.
  */
 export const getOneUser = async (req, res) => {
   try {
@@ -111,15 +121,68 @@ export const getOneUser = async (req, res) => {
 };
 
 /**
+ * @PATCH Update profile picture.
+ * @AUTH - REQUIRED
+ * @ENDPOINT /api/user/:id
+ * @REQ_BODY => { profile } -> updated profile picture
+ * @RES_BODY => { message, user } -> updated user
+ */
+export const updateProfilePicture = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const checkUser = await User.findById(id);
+
+    if (!checkUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if (checkUser.profilePicture && checkUser.profilePicture.name) {
+      await cloudinary.uploader.destroy(checkUser.profilePicture.name);
+    }
+
+    const { path, filename } = req.file;
+    const user = await User.findByIdAndUpdate(
+      id,
+      {
+        profilePicture: {
+          url: path,
+          name: filename,
+        },
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!user) {
+      return res
+        .status(401)
+        .json({ message: "Unable to update user information." });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Updated user successfully.", user: user });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error updating profile picture.",
+      error: error.message,
+    });
+  }
+};
+
+/**
  * @PUT Update a user data.
- * @AUTH -
+ * @AUTH - REQUIRED
  * @ENDPOINT /api/user/:id
  * @REQ_BODY => { req.body } body has to be updated user body.
  */
 export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateBody = req.body;
+    const updateBody = { ...req.body };
+
+    if (updateBody.profilePicture) {
+      delete updateBody.profilePicture;
+    }
 
     const checkUser = await User.findById(id);
 
@@ -145,7 +208,7 @@ export const updateUser = async (req, res) => {
 
 /**
  * @DELETE Delete a user data.
- * @AUTH -
+ * @AUTH - REQUIRED
  * @ENDPOINT /api/user/:id
  */
 export const deleteUser = async (req, res) => {
@@ -155,6 +218,10 @@ export const deleteUser = async (req, res) => {
 
     if (!checkUser) {
       return res.status(404).json({ message: "User not found." });
+    }
+
+    if (checkUser.profilePicture && checkUser.profilePicture.name) {
+      await cloudinary.uploader.destroy(checkUser.profilePicture.name);
     }
 
     const deletedUser = await User.findByIdAndDelete(id);
