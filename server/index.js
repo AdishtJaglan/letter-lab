@@ -13,6 +13,7 @@ import userRoutes from "./routes/userRoutes.js";
 import templateRoutes from "./routes/templateRoutes.js";
 import dynamicRoutes from "./routes/dynamicRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import fileRoutes from "./routes/fileRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -36,6 +37,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/template", templateRoutes);
 app.use("/api/dynamic", dynamicRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/file", fileRoutes);
 
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}.`);

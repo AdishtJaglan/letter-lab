@@ -2,6 +2,26 @@ import mongoose from "mongoose";
 import hashPassword from "../middlewares/hashPassword.js";
 const { Schema } = mongoose;
 
+const FileSchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  size: {
+    type: Number,
+    required: true,
+  },
+  contentType: {
+    type: String,
+    required: true,
+  },
+  gridFsFileId: {
+    type: Schema.Types.ObjectId,
+    ref: "GridFsFiles",
+  },
+  fileData: Buffer,
+});
+
 const UserSchema = new Schema({
   username: {
     type: String,
@@ -25,6 +45,7 @@ const UserSchema = new Schema({
       ref: "Template",
     },
   ],
+  files: [FileSchema],
 });
 
 UserSchema.pre("save", hashPassword);

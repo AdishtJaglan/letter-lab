@@ -1,6 +1,6 @@
 import { Router } from "express";
 import multer from "multer";
-import { storage } from "../cloudinary/index.js";
+import { storage } from "../store/cloudinaryConfig.js";
 import {
   createUser,
   deleteUser,
