@@ -8,11 +8,11 @@ import {
   updateDynamicModel,
 } from "../controllers/dynamicControllers.js";
 import validateObjectId from "../middlewares/validateObjectId.js";
-import veriftJwt from "../middlewares/verifyJwt.js";
+import verifyJwt from "../middlewares/verifyJwt.js";
 
 const router = Router();
 
-router.use(veriftJwt);
+router.use(verifyJwt);
 router.use("/:templateId", validateObjectId);
 
 /**

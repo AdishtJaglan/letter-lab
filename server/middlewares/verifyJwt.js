@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-const veriftJwt = async (req, res, next) => {
+const verifyJwt = async (req, res, next) => {
   const authHeader = req.headers["authorization"];
 
   if (!authHeader) {
@@ -23,4 +23,4 @@ const veriftJwt = async (req, res, next) => {
   });
 };
 
-export default veriftJwt;
+export default verifyJwt;
