@@ -7,7 +7,7 @@ const Home = () => {
     <>
       <Navbar />
       <GlowCursor />
-      <div className="from-primary-dark to-secondary-dark text-primary-light flex min-h-screen w-full flex-col items-center justify-center bg-gradient-to-br px-4 py-16">
+      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-gradient-to-br from-primary-dark to-secondary-dark px-4 py-16 text-primary-light">
         <Landing />
       </div>
     </>

@@ -117,7 +117,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="from-primary-dark via-secondary-dark to-primary-accent flex min-h-screen items-center justify-center bg-gradient-to-br p-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary-dark via-secondary-dark to-primary-accent p-4">
       <GlowCursor />
       <ToastContainer
         position="top-right"
@@ -131,10 +131,10 @@ const LoginPage = () => {
         pauseOnHover
         theme="colored"
       />
-      <div className="bg-primary-light absolute inset-0 opacity-10 backdrop-blur-lg backdrop-filter"></div>
-      <div className="bg-primary-light z-10 w-full max-w-md overflow-hidden rounded-2xl bg-opacity-20 shadow-xl backdrop-blur-xl backdrop-filter">
+      <div className="absolute inset-0 bg-primary-light opacity-10 backdrop-blur-lg backdrop-filter"></div>
+      <div className="z-10 w-full max-w-md overflow-hidden rounded-2xl bg-primary-light bg-opacity-20 shadow-xl backdrop-blur-xl backdrop-filter">
         <div className="p-8">
-          <h2 className="text-primary-light mb-6 text-center text-3xl font-bold">
+          <h2 className="mb-6 text-center text-3xl font-bold text-primary-light">
             Welcome Back
           </h2>
           <form onSubmit={handleSubmit}>
@@ -147,7 +147,7 @@ const LoginPage = () => {
                   value={formData.email}
                   onChange={handleChange}
                   id="email"
-                  className="bg-primary-light text-primary-light placeholder-primary-light focus:ring-primary-accent w-full cursor-none rounded-lg bg-opacity-10 px-4 py-3 pl-10 placeholder-opacity-60 focus:outline-none focus:ring-2"
+                  className="w-full cursor-none rounded-lg bg-primary-light bg-opacity-10 px-4 py-3 pl-10 text-primary-light placeholder-primary-light placeholder-opacity-60 focus:outline-none focus:ring-2 focus:ring-primary-accent"
                   placeholder="you@example.com"
                 />
               </div>
@@ -159,7 +159,7 @@ const LoginPage = () => {
                   value={formData.password}
                   onChange={handleChange}
                   id="password"
-                  className="bg-primary-light text-primary-light placeholder-primary-light focus:ring-primary-accent w-full cursor-none rounded-lg bg-opacity-10 px-4 py-3 pl-10 placeholder-opacity-60 focus:outline-none focus:ring-2"
+                  className="w-full cursor-none rounded-lg bg-primary-light bg-opacity-10 px-4 py-3 pl-10 text-primary-light placeholder-primary-light placeholder-opacity-60 focus:outline-none focus:ring-2 focus:ring-primary-accent"
                   placeholder="••••••••"
                 />
               </div>
@@ -170,11 +170,11 @@ const LoginPage = () => {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="text-primary-accent focus:ring-primary-accent border-primary-light bg-primary-light h-4 w-4 cursor-none rounded bg-opacity-10"
+                  className="h-4 w-4 cursor-none rounded border-primary-light bg-primary-light bg-opacity-10 text-primary-accent focus:ring-primary-accent"
                 />
                 <label
                   htmlFor="remember-me"
-                  className="text-primary-light ml-2 block cursor-none text-sm"
+                  className="ml-2 block cursor-none text-sm text-primary-light"
                 >
                   Remember me
                 </label>
@@ -191,7 +191,7 @@ const LoginPage = () => {
             <div className="mt-8">
               <button
                 type="submit"
-                className="from-primary-accent to-secondary-accent text-primary-light hover:from-primary-accentHover hover:to-secondary-accentHover focus:ring-primary-accent flex w-full cursor-none items-center justify-center rounded-lg bg-gradient-to-r px-4 py-3 font-bold transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                className="flex w-full cursor-none items-center justify-center rounded-lg bg-gradient-to-r from-primary-accent to-secondary-accent px-4 py-3 font-bold text-primary-light transition duration-300 hover:from-primary-accentHover hover:to-secondary-accentHover focus:outline-none focus:ring-2 focus:ring-primary-accent focus:ring-offset-2"
               >
                 {loading ? (
                   <ImSpinner8 className="h-auto w-5 animate-spin" />
@@ -213,7 +213,7 @@ const LoginPage = () => {
               <div>
                 <a
                   href="#"
-                  className="border-primary-light bg-primary-light text-primary-light inline-flex w-full cursor-none justify-center rounded-md border bg-opacity-10 px-4 py-2 text-sm font-medium shadow-sm hover:bg-opacity-20"
+                  className="inline-flex w-full cursor-none justify-center rounded-md border border-primary-light bg-primary-light bg-opacity-10 px-4 py-2 text-sm font-medium text-primary-light shadow-sm hover:bg-opacity-20"
                 >
                   <span className="sr-only">Sign in with Google</span>
                   <FcGoogle className="h-auto w-8" />
@@ -222,7 +222,7 @@ const LoginPage = () => {
               <div>
                 <a
                   href="#"
-                  className="border-primary-light bg-primary-light text-primary-light inline-flex w-full cursor-none justify-center rounded-md border bg-opacity-10 px-4 py-2 text-sm font-medium shadow-sm hover:bg-opacity-20"
+                  className="inline-flex w-full cursor-none justify-center rounded-md border border-primary-light bg-primary-light bg-opacity-10 px-4 py-2 text-sm font-medium text-primary-light shadow-sm hover:bg-opacity-20"
                 >
                   <span className="sr-only">Sign in with GitHub</span>
                   <FaGithub className="h-auto w-8" />
@@ -232,7 +232,7 @@ const LoginPage = () => {
           </div>
         </div>
         <div className="bg-primary-light bg-opacity-10 px-8 py-6">
-          <p className="text-primary-light text-center text-sm">
+          <p className="text-center text-sm text-primary-light">
             Don&apos;t have an account?{" "}
             <a
               href="#"
