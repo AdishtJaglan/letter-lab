@@ -4,7 +4,7 @@ const GlowCursor = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
-    const updatePosition = (e) => {
+    const updatePosition = (e: { clientX: number; clientY: number }) => {
       setPosition({ x: e.clientX, y: e.clientY });
     };
 

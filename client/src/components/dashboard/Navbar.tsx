@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode, JwtPayload } from "jwt-decode";
 import axios from "axios";
+
+interface CustomJwtPayload extends JwtPayload {
+  userId: string;
+}
 
 const Navbar = () => {
   const [username, setUsername] = useState("");
@@ -11,7 +15,8 @@ const Navbar = () => {
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     const userId =
-      location.state?.userId || (token ? jwtDecode(token).userId : undefined);
+      location.state?.userId ||
+      (token ? jwtDecode<CustomJwtPayload>(token).userId : undefined);
 
     if (userId) {
       const fetchUserName = async () => {

@@ -9,7 +9,7 @@ import {
 import { GrDocumentConfig } from "react-icons/gr";
 
 export default function Sidebar() {
-  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [hoveredIndex, setHoveredIndex] = useState<Number | null>(null);
   const location = useLocation();
 
   const sidebarItems = [

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
@@ -68,7 +68,7 @@ const LoginPage = () => {
     }
   }, [navigate]);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -76,7 +76,7 @@ const LoginPage = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
@@ -100,8 +100,8 @@ const LoginPage = () => {
 
       navigate("/dashboard", { state: { isLoggedIn: true } });
     } catch (error) {
-      console.error("Error loggin in: " + error?.message || error?.error);
-      toast.error("Error logging in: " + error?.message || error?.error, {
+      console.error("Error loggin in: " + error);
+      toast.error("Error logging in: " + error, {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
