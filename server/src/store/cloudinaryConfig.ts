@@ -17,7 +17,7 @@ const storage = new CloudinaryStorage({
   params: {
     folder: "LetterLab",
     allowedFormats: ["jpeg", "jpg", "png"],
-  },
+  } as any,
 });
 
 export { cloudinary, storage };
