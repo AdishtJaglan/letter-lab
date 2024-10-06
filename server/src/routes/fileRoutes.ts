@@ -1,6 +1,5 @@
 import { Router } from "express";
 import multer from "multer";
-import User from "../models/User.js";
 import verifyJwt from "../middlewares/verifyJwt.js";
 import {
   deleteFile,

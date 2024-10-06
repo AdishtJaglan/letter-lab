@@ -7,13 +7,13 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 
-import rateLimiter from "./middlewares/rateLimiter.js";
-
 import userRoutes from "./routes/userRoutes.js";
 import templateRoutes from "./routes/templateRoutes.js";
 import dynamicRoutes from "./routes/dynamicRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
+
+import rateLimiter from "./middlewares/rateLimiter.js";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
