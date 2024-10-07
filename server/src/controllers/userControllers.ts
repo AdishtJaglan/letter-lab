@@ -1,5 +1,11 @@
+import { Request, Response, NextFunction } from "express";
 import { v2 as cloudinary } from "cloudinary";
+import { CustomJwtPayload } from "./authController.js";
 import User from "../models/User.js";
+
+interface CustomRequestBody extends Request {
+  user: CustomJwtPayload;
+}
 
 /**
  * @POST create a user.
@@ -7,19 +13,25 @@ import User from "../models/User.js";
  * @ENDPOINT /api/user
  * @REQ_BODY => { username, email, password } are required.
  */
-export const createUser = async (req, res) => {
+export const createUser = async (
+  req: CustomRequestBody,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { username, email, password } = req.body;
-    const { filename, path } = req.file;
+    const { filename, path } = req.file!;
 
     if (!username || !email || !password) {
-      return res.status(400).json({ message: "All field mandatory." });
+      res.status(400).json({ message: "All field mandatory." });
+      return;
     }
 
     const checkUser = await User.findOne({ email });
 
     if (checkUser) {
-      return res.status(409).json({ message: "User already exists." });
+      res.status(409).json({ message: "User already exists." });
+      return;
     }
 
     const user = await User.create({
@@ -32,13 +44,18 @@ export const createUser = async (req, res) => {
       },
     });
 
-    return res
-      .status(201)
-      .json({ message: "User created successfully.", data: user });
+    res.status(201).json({ message: "User created successfully.", data: user });
   } catch (error) {
-    return res.status(500).json({
+    if (error instanceof Error) {
+      res.status(500).json({
+        message: "Error occurred while trying to create the user.",
+        error: error.message,
+      });
+      return;
+    }
+
+    res.status(500).json({
       message: "Error occurred while trying to create the user.",
-      error: error.message,
     });
   }
 };
@@ -49,19 +66,29 @@ export const createUser = async (req, res) => {
  * @ENDPOINT /api/user
  * @RES_BODY => { message, data[] } data will be an array of users.
  */
-export const getAllUsers = async (req, res) => {
+export const getAllUsers = async (
+  req: CustomRequestBody,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const users = await User.find({});
 
     if (!users) {
-      return res.status(204).json({ message: "No data found." });
+      res.status(204).json({ message: "No data found." });
+      return;
     }
 
-    return res.status(200).json({ message: "Fetched users.", data: users });
+    res.status(200).json({ message: "Fetched users.", data: users });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Unable to fetch users.", error: error.message });
+    if (error instanceof Error) {
+      res
+        .status(500)
+        .json({ message: "Unable to fetch users.", error: error.message });
+      return;
+    }
+
+    res.status(500).json({ message: "Unable to fetch users." });
   }
 };
 
@@ -71,17 +98,22 @@ export const getAllUsers = async (req, res) => {
  * @ENDPOINT /api/user/template
  * @RES_BODY => { message, data, templates[] } data will be a user, template will be registered templates.
  */
-export const getUserTemplate = async (req, res) => {
+export const getUserTemplate = async (
+  req: CustomRequestBody,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { userId: id } = req.user;
 
     const user = await User.findById(id).populate("templates");
 
     if (!user) {
-      return res.status(404).json({ message: "No user found." });
+      res.status(404).json({ message: "No user found." });
+      return;
     }
 
-    return res.status(200).json({
+    res.status(200).json({
       message: "Fetched user and user's template data.",
       name: user.username,
       email: user.email,
@@ -89,9 +121,16 @@ export const getUserTemplate = async (req, res) => {
       template: user.templates,
     });
   } catch (error) {
-    return res.status(500).json({
+    if (error instanceof Error) {
+      res.status(500).json({
+        message: "Unable to fetch user and user's template information.",
+        error: error.message,
+      });
+      return;
+    }
+
+    res.status(500).json({
       message: "Unable to fetch user and user's template information.",
-      error: error.message,
     });
   }
 };
@@ -102,21 +141,31 @@ export const getUserTemplate = async (req, res) => {
  * @ENDPOINT /api/user/info
  * @RES_BODY => { message, data } data will be a user.
  */
-export const getOneUser = async (req, res) => {
+export const getOneUser = async (
+  req: CustomRequestBody,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { userId: id } = req.user;
 
     const user = await User.findById(id);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      res.status(404).json({ message: "User not found." });
+      return;
     }
 
-    return res.status(200).json({ message: "Fetched user data.", data: user });
+    res.status(200).json({ message: "Fetched user data.", data: user });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Unable to fetch user.", error: error.message });
+    if (error instanceof Error) {
+      res
+        .status(500)
+        .json({ message: "Unable to fetch user.", error: error.message });
+      return;
+    }
+
+    res.status(500).json({ message: "Unable to fetch user." });
   }
 };
 
@@ -127,20 +176,25 @@ export const getOneUser = async (req, res) => {
  * @REQ_BODY => { profile } -> updated profile picture
  * @RES_BODY => { message, user } -> updated user
  */
-export const updateProfilePicture = async (req, res) => {
+export const updateProfilePicture = async (
+  req: CustomRequestBody,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { userId: id } = req.user;
     const checkUser = await User.findById(id);
 
     if (!checkUser) {
-      return res.status(404).json({ message: "User not found." });
+      res.status(404).json({ message: "User not found." });
+      return;
     }
 
     if (checkUser.profilePicture && checkUser.profilePicture.name) {
       await cloudinary.uploader.destroy(checkUser.profilePicture.name);
     }
 
-    const { path, filename } = req.file;
+    const { path, filename } = req.file!;
     const user = await User.findByIdAndUpdate(
       id,
       {
@@ -153,18 +207,22 @@ export const updateProfilePicture = async (req, res) => {
     );
 
     if (!user) {
-      return res
-        .status(401)
-        .json({ message: "Unable to update user information." });
+      res.status(401).json({ message: "Unable to update user information." });
+      return;
     }
 
-    return res
-      .status(200)
-      .json({ message: "Updated user successfully.", user: user });
+    res.status(200).json({ message: "Updated user successfully.", user: user });
   } catch (error) {
-    return res.status(500).json({
+    if (error instanceof Error) {
+      res.status(500).json({
+        message: "Error updating profile picture.",
+        error: error.message,
+      });
+      return;
+    }
+
+    res.status(500).json({
       message: "Error updating profile picture.",
-      error: error.message,
     });
   }
 };
@@ -175,7 +233,11 @@ export const updateProfilePicture = async (req, res) => {
  * @ENDPOINT /api/user/
  * @REQ_BODY => { req.body } body has to be updated user body.
  */
-export const updateUser = async (req, res) => {
+export const updateUser = async (
+  req: CustomRequestBody,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { userId: id } = req.user;
     const updateBody = { ...req.body };
@@ -187,21 +249,29 @@ export const updateUser = async (req, res) => {
     const checkUser = await User.findById(id);
 
     if (!checkUser) {
-      return res.status(404).json({ message: "User not found." });
+      res.status(404).json({ message: "User not found." });
+      return;
     }
 
     const updatedUser = await User.findByIdAndUpdate(id, updateBody, {
       new: true,
     });
 
-    return res.status(200).json({
+    res.status(200).json({
       message: "Updated user successfully.",
       updatedData: updatedUser,
     });
   } catch (error) {
-    return res.status(500).json({
+    if (error instanceof Error) {
+      res.status(500).json({
+        message: "User information unable to be updated",
+        error: error.message,
+      });
+      return;
+    }
+
+    res.status(500).json({
       message: "User information unable to be updated",
-      error: error.message,
     });
   }
 };
@@ -211,13 +281,18 @@ export const updateUser = async (req, res) => {
  * @AUTH - REQUIRED
  * @ENDPOINT /api/user/
  */
-export const deleteUser = async (req, res) => {
+export const deleteUser = async (
+  req: CustomRequestBody,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { userId: id } = req.user;
     const checkUser = await User.findById(id);
 
     if (!checkUser) {
-      return res.status(404).json({ message: "User not found." });
+      res.status(404).json({ message: "User not found." });
+      return;
     }
 
     if (checkUser.profilePicture && checkUser.profilePicture.name) {
@@ -226,13 +301,18 @@ export const deleteUser = async (req, res) => {
 
     const deletedUser = await User.findByIdAndDelete(id);
 
-    return res.status(200).json({
+    res.status(200).json({
       message: "User deleted successfully.",
       deletedData: deletedUser,
     });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Unable to delete user.", error: error.message });
+    if (error instanceof Error) {
+      res
+        .status(500)
+        .json({ message: "Unable to delete user.", error: error.message });
+      return;
+    }
+
+    res.status(500).json({ message: "Unable to delete user." });
   }
 };
