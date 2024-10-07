@@ -1,4 +1,4 @@
-import getDyanmicModel from "../models/DynamicModel.js";
+import { getDynamicModel } from "../models/DynamicModel.js";
 import Template from "../models/Template.js";
 
 /**
@@ -17,7 +17,7 @@ export const addDataToDynamicModel = async (req, res) => {
       return res.status(404).json({ message: "Template not found." });
     }
 
-    const DynamicModel = getDyanmicModel(templateId, template.fields);
+    const DynamicModel = getDynamicModel(templateId, template.fields);
     const data = { template: templateId, ...req.body };
 
     const newEntry = await DynamicModel.create(data);
@@ -49,7 +49,7 @@ export const getDynamicModelData = async (req, res) => {
       return res.status(404).json({ message: "Template not found." });
     }
 
-    const DynamicModel = getDyanmicModel(templateId, template.fields);
+    const DynamicModel = getDynamicModel(templateId, template.fields);
     const data = await DynamicModel.find({ template: templateId });
 
     if (!data) {
@@ -85,7 +85,7 @@ export const getSingleDataFromDynamicModel = async (req, res) => {
       return res.status(404).json({ message: "Template not found." });
     }
 
-    const DynamicModel = getDyanmicModel(templateId, template.fields);
+    const DynamicModel = getDynamicModel(templateId, template.fields);
     const data = await DynamicModel.findById(id);
 
     if (!data) {
@@ -120,7 +120,7 @@ export const setMailSent = async (req, res) => {
       return res.status(404).json({ message: "Template not found." });
     }
 
-    const DynamicModel = getDyanmicModel(templateId, template.fields);
+    const DynamicModel = getDynamicModel(templateId, template.fields);
     const patchedData = await DynamicModel.findByIdAndUpdate(
       id,
       { isMailSent: true },
@@ -161,7 +161,7 @@ export const updateDynamicModel = async (req, res) => {
       return res.status(404).json({ message: "Template not found." });
     }
 
-    const DynamicModel = getDyanmicModel(templateId, template.fields);
+    const DynamicModel = getDynamicModel(templateId, template.fields);
     const updatedData = await DynamicModel.findByIdAndUpdate(id, updateBody, {
       new: true,
     });
@@ -198,7 +198,7 @@ export const deleteDynamicModelData = async (req, res) => {
       return res.status(404).json({ message: "Template not found." });
     }
 
-    const DynamicModel = getDyanmicModel(templateId, template.fields);
+    const DynamicModel = getDynamicModel(templateId, template.fields);
     const deletedData = await DynamicModel.findByIdAndDelete(id);
 
     if (!deletedData) {

@@ -1,7 +1,20 @@
-import mongoose from "mongoose";
-const { Schema } = mongoose;
+import mongoose, { Types, Schema } from "mongoose";
 
-const getDyanmicModel = (templateId, fields) => {
+interface Fields {
+  type: string;
+  name: string;
+}
+
+/**
+ * Generates a dynamic Mongoose model based on the provided fields.
+ * @param {mongoose.Types.ObjectId | string} templateId - The template ID used for model naming.
+ * @param {Fields[]} fields - An array of field definitions for the schema.
+ * @returns {mongoose.Model} - The dynamically created Mongoose model.
+ */
+export const getDynamicModel = (
+  templateId: mongoose.Types.ObjectId | string,
+  fields: Fields[]
+) => {
   const dynamicSchema = new Schema(
     {
       template: {
@@ -43,11 +56,24 @@ const getDyanmicModel = (templateId, fields) => {
 
   const modelName = `Template${templateId}Data`;
 
-  if (mongoose.models[modelName]) {
-    return mongoose.model(modelName);
-  }
-
-  return mongoose.model(modelName, dynamicSchema);
+  return mongoose.models[modelName] || mongoose.model(modelName, dynamicSchema);
 };
 
-export default getDyanmicModel;
+/**
+ * Converts a Mongoose DocumentArray to a plain array of Fields.
+ * @param {Types.DocumentArray} documentArray - The Mongoose DocumentArray to convert.
+ * @returns {Fields[]} - A plain array of field objects.
+ */
+export const convertToPlainFields = (
+  documentArray: Types.DocumentArray<{
+    type?: string | null;
+    name?: string | null;
+  }>
+): Fields[] => {
+  return documentArray
+    .map((doc) => ({
+      type: doc.type || "",
+      name: doc.name || "",
+    }))
+    .filter((field) => field.type && field.name); // Filter out fields missing type or name
+};
