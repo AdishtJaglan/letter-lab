@@ -1,6 +1,11 @@
-import jwt from "jsonwebtoken";
+import { Request, Response, NextFunction } from "express";
+import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import User from "../models/User.js";
+
+interface CustomJwtPayload extends JwtPayload {
+  userId: string;
+}
 
 /**
  * @POST verify credential and issue access and refresh tokens.
@@ -9,31 +14,41 @@ import User from "../models/User.js";
  * @REQ_BODY => { username, email } are required.
  * @RES_BODY => { message, accessToken, refreshToken }
  */
-export const getAccessToken = async (req, res) => {
+export const getAccessToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
+    const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
+    const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
+
+    if (!refreshTokenSecret || !accessTokenSecret) {
+      res.status(500).json({ message: "Server configuration error." });
+      return;
+    }
+
     const { email, password } = req.body;
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      res.status(404).json({ message: "User not found." });
+      return;
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid credentials." });
+      res.status(401).json({ message: "Invalid credentials." });
+      return;
     }
 
-    const accessToken = jwt.sign(
-      { userId: user._id },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
-    );
-    const refreshToken = jwt.sign(
-      { userId: user._id },
-      process.env.REFRESH_TOKEN_SECRET,
-      { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
-    );
+    const accessToken = jwt.sign({ userId: user._id }, accessTokenSecret, {
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+    });
+    const refreshToken = jwt.sign({ userId: user._id }, refreshTokenSecret, {
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+    });
 
     res.status(200).json({
       message: "Credentials valid. Autheniticated.",
@@ -41,9 +56,14 @@ export const getAccessToken = async (req, res) => {
       refreshToken,
     });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error while authenticating.", error: error.message });
+    if (error instanceof Error) {
+      res
+        .status(500)
+        .json({ message: "Error while authenticating.", error: error.message });
+      return;
+    }
+
+    res.status(500).json({ message: "Error while authenticating." });
   }
 };
 
@@ -54,38 +74,66 @@ export const getAccessToken = async (req, res) => {
  * @REQ_BODY => { refreshToken } is required.
  * @RES_BODY => { message, accessToken }
  */
-export const getNewAccessToken = async (req, res) => {
+export const getNewAccessToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
+    const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
+    const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
+
+    if (!refreshTokenSecret || !accessTokenSecret) {
+      res.status(500).json({ message: "Server configuration error." });
+      return;
+    }
+
     const { refreshToken } = req.body;
 
     if (!refreshToken) {
-      return res.status(400).json({ message: "Refresh token is required." });
+      res.status(400).json({ message: "Refresh token is required." });
+      return;
     }
 
     jwt.verify(
       refreshToken,
-      process.env.REFRESH_TOKEN_SECRET,
-      (error, decoded) => {
-        if (error) {
-          return res.status(401).json({ message: "Invalid refresh token." });
+      refreshTokenSecret,
+      (
+        error: VerifyErrors | null,
+        decoded: JwtPayload | string | undefined
+      ) => {
+        if (error || !decoded || typeof decoded === "string") {
+          res.status(401).json({ message: "Invalid refresh token." });
+          return;
         }
 
-        const accessToken = jwt.sign(
-          { userId: decoded.userId },
-          process.env.ACCESS_TOKEN_SECRET,
-          { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
-        );
+        const { userId } = decoded as CustomJwtPayload;
 
-        return res.status(200).json({
+        if (!userId) {
+          res.status(401).json({ message: "Invalid token payload." });
+          return;
+        }
+
+        const accessToken = jwt.sign({ userId }, accessTokenSecret, {
+          expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+        });
+
+        res.status(200).json({
           message: "Refresh token valid. Authenticated.",
           accessToken,
         });
+        return;
       }
     );
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error issuing access token.", error: error.message });
+    if (error instanceof Error) {
+      res
+        .status(500)
+        .json({ message: "Error issuing access token.", error: error.message });
+      return;
+    }
+
+    res.status(500).json({ message: "Error issuing access token." });
   }
 };
 
@@ -97,23 +145,48 @@ export const getNewAccessToken = async (req, res) => {
  * @RES_BODY { accessToken, refreshToken } -> contains information regarding validity of each token.
  *                                            If valid, contains a user object with userID
  */
-export const verifyAccessAndRefreshTokens = async (req, res) => {
+export const verifyAccessAndRefreshTokens = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
+    const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
+    const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
+
+    if (!refreshTokenSecret || !accessTokenSecret) {
+      res.status(500).json({ message: "Server configuration error." });
+      return;
+    }
+
     const { accessToken, refreshToken } = req.body;
 
     if (!accessToken && !refreshToken) {
-      return res
-        .status(400)
-        .json({ message: "Tokens missing. Invalid request." });
+      res.status(400).json({ message: "Tokens missing. Invalid request." });
+      return;
     }
 
-    const response = {};
+    const response: {
+      accessToken?: {
+        valid: boolean;
+        message: string;
+        user?: JwtPayload | string;
+      };
+      refreshToken?: {
+        valid: boolean;
+        message: string;
+        user?: JwtPayload | string;
+      };
+    } = {};
 
     if (accessToken) {
       jwt.verify(
         accessToken,
-        process.env.ACCESS_TOKEN_SECRET,
-        (error, decoded) => {
+        accessTokenSecret,
+        (
+          error: VerifyErrors | null,
+          decoded: JwtPayload | string | undefined
+        ) => {
           if (error) {
             response.accessToken = {
               valid: false,
@@ -133,8 +206,11 @@ export const verifyAccessAndRefreshTokens = async (req, res) => {
     if (refreshToken) {
       jwt.verify(
         refreshToken,
-        process.env.REFRESH_TOKEN_SECRET,
-        (error, decoded) => {
+        refreshTokenSecret,
+        (
+          error: VerifyErrors | null,
+          decoded: JwtPayload | string | undefined
+        ) => {
           if (error) {
             response.refreshToken = {
               valid: false,
@@ -151,10 +227,18 @@ export const verifyAccessAndRefreshTokens = async (req, res) => {
       );
     }
 
-    return res.status(200).json(response);
+    res.status(200).json(response);
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error verifying access token.", error: error.message });
+    if (error instanceof Error) {
+      res.status(500).json({
+        message: "Error verifying access token.",
+        error: error.message,
+      });
+      return;
+    }
+
+    res.status(500).json({
+      message: "Error verifying access token.",
+    });
   }
 };
