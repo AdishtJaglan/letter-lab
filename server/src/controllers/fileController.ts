@@ -1,4 +1,10 @@
+import { Request, Response, NextFunction } from "express";
+import { CustomJwtPayload } from "./authController.js";
 import User from "../models/User.js";
+
+interface CustomRequestBody extends Request {
+  user: CustomJwtPayload;
+}
 
 /**
  * @POST Upload a file.
@@ -7,16 +13,27 @@ import User from "../models/User.js";
  * @REQ_BODY => { file } -> the file you are upload. @MAX_SIZE - 16MB
  * @RES_BODY => { message, file } -> saved file
  */
-export const uploadFile = async (req, res) => {
+export const uploadFile = async (
+  req: CustomRequestBody,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { userId: id } = req.user;
     const user = await User.findById(id);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      res.status(404).json({ message: "User not found." });
+      return;
     }
 
     const { file } = req;
+
+    if (!file) {
+      res.status(404).json({ message: "File not found." });
+      return;
+    }
+
     user.files.push({
       name: file.fieldname,
       size: file.size,
@@ -26,13 +43,18 @@ export const uploadFile = async (req, res) => {
 
     await user.save();
 
-    return res
+    res
       .status(201)
       .json({ message: "Saved file successfully.", file: user.files });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Unable to upload file.", error: error.message });
+    if (error instanceof Error) {
+      res
+        .status(500)
+        .json({ message: "Unable to upload file.", error: error.message });
+      return;
+    }
+
+    res.status(500).json({ message: "Unable to upload file." });
   }
 };
 
@@ -42,22 +64,32 @@ export const uploadFile = async (req, res) => {
  * @ENDPOINT /api/file/
  * @RES_BODY => { message, files[] } -> array of files
  */
-export const getAllFiles = async (req, res) => {
+export const getAllFiles = async (
+  req: CustomRequestBody,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { userId: id } = req.user;
     const user = await User.findById(id).select("files");
 
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      res.status(404).json({ message: "User not found." });
+      return;
     }
 
-    return res
+    res
       .status(200)
       .json({ message: "Fetched user's file data.", files: user.files });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error fetching files.", error: error.message });
+    if (error instanceof Error) {
+      res
+        .status(500)
+        .json({ message: "Error fetching files.", error: error.message });
+      return;
+    }
+
+    res.status(500).json({ message: "Error fetching files." });
   }
 };
 
@@ -67,29 +99,38 @@ export const getAllFiles = async (req, res) => {
  * @ENDPOINT /api/file/:fileId -> id of the file
  * @RES_BODY => { message, data } -> data has file
  */
-export const getOneFile = async (req, res) => {
+export const getOneFile = async (
+  req: CustomRequestBody,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { userId: id } = req.user;
     const { fileId } = req.params;
     const user = await User.findById(id);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      res.status(404).json({ message: "User not found." });
+      return;
     }
 
     const file = user.files.id(fileId);
 
     if (!file) {
-      return res.status(404).json({ message: "File not found." });
+      res.status(404).json({ message: "File not found." });
+      return;
     }
 
-    return res
-      .status(200)
-      .json({ message: "File fetched successfully.", data: file });
+    res.status(200).json({ message: "File fetched successfully.", data: file });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error fetching file.", error: error.message });
+    if (error instanceof Error) {
+      res
+        .status(500)
+        .json({ message: "Error fetching file.", error: error.message });
+      return;
+    }
+
+    res.status(500).json({ message: "Error fetching file." });
   }
 };
 
@@ -100,7 +141,11 @@ export const getOneFile = async (req, res) => {
  * @REQ_BODY { type } -> send type of file you want, ex: pdf, docx etc
  * @RES_BODY => gives option/downloads file to your device
  */
-export const downloadOneFile = async (req, res) => {
+export const downloadOneFile = async (
+  req: CustomRequestBody,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { userId: id } = req.user;
     const { fileId } = req.params;
@@ -108,13 +153,15 @@ export const downloadOneFile = async (req, res) => {
     const user = await User.findById(id);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      res.status(404).json({ message: "User not found." });
+      return;
     }
 
     const file = user.files.id(fileId);
 
     if (!file) {
-      return res.status(404).json({ message: "File not found." });
+      res.status(404).json({ message: "File not found." });
+      return;
     }
 
     res.set({
@@ -125,9 +172,14 @@ export const downloadOneFile = async (req, res) => {
 
     res.send(file.fileData);
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Unable to download file.", error: error.message });
+    if (error instanceof Error) {
+      res
+        .status(500)
+        .json({ message: "Unable to download file.", error: error.message });
+      return;
+    }
+
+    res.status(500).json({ message: "Unable to download file." });
   }
 };
 
@@ -138,7 +190,11 @@ export const downloadOneFile = async (req, res) => {
  * @REQ_BODY => { name } -> updated name.
  * @RES_BODY => { message, file } -> update file
  */
-export const updateFile = async (req, res) => {
+export const updateFile = async (
+  req: CustomRequestBody,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { userId: id } = req.user;
     const { fileId } = req.params;
@@ -147,26 +203,33 @@ export const updateFile = async (req, res) => {
     const user = await User.findById(id);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      res.status(404).json({ message: "User not found." });
+      return;
     }
 
     const file = user.files.id(fileId);
 
     if (!file) {
-      return res.status(404).json({ message: "File not found." });
+      res.status(404).json({ message: "File not found." });
+      return;
     }
 
     file.name = name;
     console.log(file.name);
     await user.save();
 
-    return res
+    res
       .status(200)
       .json({ message: "File updated successfully.", file: user.files });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error updating the file.", error: error.message });
+    if (error instanceof Error) {
+      res
+        .status(500)
+        .json({ message: "Error updating the file.", error: error.message });
+      return;
+    }
+
+    res.status(500).json({ message: "Error updating the file." });
   }
 };
 
@@ -176,25 +239,35 @@ export const updateFile = async (req, res) => {
  * @ENDPOINT /api/file/:fileId -> id of the file
  * @RES_BODY => { message, file } -> deleted file for verification
  */
-export const deleteFile = async (req, res) => {
+export const deleteFile = async (
+  req: CustomRequestBody,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { userId: id } = req.user;
     const { fileId } = req.params;
     const user = await User.findById(id);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      res.status(404).json({ message: "User not found." });
+      return;
     }
 
-    user.files.id(fileId).deleteOne();
+    user?.files?.id(fileId)?.deleteOne();
     await user.save();
 
-    return res
+    res
       .status(200)
       .json({ message: "File deleted successfully.", files: user.files });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error deleting the file.", error: error.message });
+    if (error instanceof Error) {
+      res
+        .status(500)
+        .json({ message: "Error deleting the file.", error: error.message });
+      return;
+    }
+
+    res.status(500).json({ message: "Error deleting the file." });
   }
 };
